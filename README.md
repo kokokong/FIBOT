@@ -1,2 +1,0 @@
-# FIBOT
-Team_25

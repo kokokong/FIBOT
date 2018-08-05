@@ -1,0 +1,108 @@
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import time
+import pandas as pd
+import re
+import datetime
+from selenium import webdriver
+import pandas as pd
+import sys
+import pymysql
+ 
+dt = datetime.datetime.now()
+dt = dt.strftime("%Y-%m-%d")
+lst= []
+tmp = []
+driver = webdriver.Chrome(executable_path='./chromedriver')# 크롬웹드라이버 실행코드
+driver.implicitly_wait(10)
+driver.get('https://finance.naver.com/sise/sise_market_sum.nhn?sosok=0&page=1')
+driver.find_element_by_xpath("""//*[@id="option1"]""").click()
+driver.find_element_by_xpath("""//*[@id="option24"]""").click()
+driver.find_element_by_xpath("""//*[@id="contentarea_left"]/div[2]/form/div/div/div/a[1]/img""").click()
+for sosok in range(2): 
+    url = 'https://finance.naver.com/sise/sise_market_sum.nhn?sosok=%s&page=1'%sosok
+    html = urlopen(url)
+    source = BeautifulSoup(html.read(), "html.parser")
+    dayPricePageNavigation = source.find_all("table", align="center")
+    dayPriceMaxPageSection = dayPricePageNavigation[0].find_all("td", class_="pgRR")
+    dayPriceMaxPageNum = int(dayPriceMaxPageSection[0].a.get('href')[-2:])
+    
+    for k in range(1,dayPriceMaxPageNum+1):                           
+        driver.get('https://finance.naver.com/sise/sise_market_sum.nhn?sosok=%s&page=%s'%(sosok,k))#주소불러와서 크롤링 시작
+        time.sleep(2) 
+        for i in range(2,79):
+            if i == 7 or i == 8 or i == 9 or i == 15 or i == 16 or i == 17 or i == 23 or i == 24 or i == 25 or i == 31 or i == 32 or i == 33 or i == 39 or i == 40 or i == 41 or i == 47 or i == 48 or i == 49 or i == 55 or i == 56 or i == 57 or i == 63 or i == 64 or i == 65 or i==71 or i==72 or i==73:
+                pass                     
+            else:
+                if sosok == 0:
+                    num = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[1]"""%i).text
+                    name = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[2]/a"""%i).text                                   
+                    cur  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[3]"""%i).text.replace(',','')
+                    diff = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[4]/span"""%i).text.replace(',','')
+                    fluck= driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[5]/span"""%i).text
+                    face  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[6]"""%i).text.replace(',','')
+                    stocks_listed  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[7]"""%i).text.replace(',','')
+                    market_cap  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[8]"""%i).text.replace(',','')
+                    foriegn  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[9]"""%i).text.replace(',','')
+                    per  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[10]"""%i).text.replace(',','').replace('N/A','')
+                    roe  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[11]"""%i).text.replace(',','').replace('N/A','')
+                    pbr  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[12]"""%i).text.replace(',','').replace('N/A','')
+                    tmp = [dt, name,cur,diff,fluck,face,stocks_listed,market_cap,foriegn,per,roe,pbr]
+                    lst.append(tmp)
+                    if num == '1480':
+                        break
+                else: 
+                    num = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[1]"""%i).text
+                    name = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[2]/a"""%i).text                                   
+                    cur  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[3]"""%i).text.replace(',','')
+                    diff = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[4]/span"""%i).text.replace(',','')
+                    fluck= driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[5]/span"""%i).text
+                    face  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[6]"""%i).text.replace(',','')
+                    stocks_listed  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[7]"""%i).text.replace(',','')
+                    market_cap  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[8]"""%i).text.replace(',','')
+                    foriegn  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[9]"""%i).text.replace(',','')
+                    per  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[10]"""%i).text.replace(',','').replace('N/A','')
+                    roe  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[11]"""%i).text.replace(',','').replace('N/A','')
+                    pbr  = driver.find_element_by_xpath("""//*[@id="contentarea"]/div[3]/table[1]/tbody/tr[%s]/td[12]"""%i).text.replace(',','').replace('N/A','')
+                    tmp = [dt, name,cur,diff,fluck,face,stocks_listed,market_cap,foriegn,per,roe,pbr]
+                    lst.append(tmp)
+                    if num == '1276':
+                        break
+          
+
+driver.quit()               
+
+df = pd.DataFrame(lst,columns=["날짜","종목명","현재가","전일비","등락률","액면가","상장주식수","시가총액","외국인비율","PER","ROE","PBR"])
+df.to_excel("./DATA/crawling_data.xlsx")
+sector = pd.read_excel("./DATA/Sectors.xlsx")
+
+df =df.merge(sector,on="종목명",how='left')
+#df_a.merge(df_b, on='mukey', how='left')
+df["PER"] = df["PER"].fillna(sys.maxsize)
+df["PBR"] = df["PBR"].fillna(sys.maxsize)
+df["ROE"] = df["ROE"].fillna(-sys.maxsize)
+df["Returns"]= df["Returns"].fillna(-sys.maxsize)
+
+conn = pymysql.Connect(host='pythondb.ceekfdzgubcw.ap-northeast-2.rds.amazonaws.com',
+                       port = 3306,
+                       user = 'root',
+                       passwd = 'wldnjs0216',
+                       database = 'ppp',
+                       charset = 'utf8',
+                       autocommit=True)
+cursor = conn.cursor()
+cursor.execute("DROP TABLE IF EXISTS `stockInfo`")
+cursor.execute("CREATE TABLE IF NOT EXISTS `stockInfo`(`date` VARCHAR(50) NULL ,`name` VARCHAR(50) NULL ,`price` FLOAT(20) NULL ,`diff` FLOAT(20) NULL  ,`diff_per` VARCHAR(20) NULL  ,`face` FLOAT(20) NULL  ,`stocks_listed` FLOAT(20) NULL  ,`market_cap` FLOAT(20) NULL ,`foriegn` FLOAT(20) NULL  ,`per` FLOAT(20) NULL ,`roe` FLOAT(20) NULL ,`pbr` FLOAT(20) NULL, `Symbol` VARCHAR(10) NULL, `sector` VARCHAR(10) NULL, `returns` FLOAT(20) NULL,PRIMARY KEY(`name`))")
+for i in  range(len(df.index)):
+    print(i)
+    cursor.execute("INSERT INTO `stockInfo` VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')"%(df.iloc[i,0],df.iloc[i,1],df.iloc[i,2],df.iloc[i,3],df.iloc[i,4],df.iloc[i,5],df.iloc[i,6],df.iloc[i,7],df.iloc[i,8],df.iloc[i,9],df.iloc[i,10],df.iloc[i,11],df.iloc[i,12],df.iloc[i,13],df.iloc[i,14]))
+
+"""
+cursor.execute("SELECT `name`,`pbr`,`market_cap` FROM `ppp`.`stockInfo` WHERE `sector`='제조업' and `pbr`<10 and `pbr`>0 ORDER BY `market_cap` DESC limit 5")
+rows = cursor.fetchall()
+lst=[]
+for row in rows:
+    lst.append(row)
+cursor.close()
+conn.close()
+"""
