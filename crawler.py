@@ -33,8 +33,11 @@ def fundPrice():
 
 
 def GetFunds(FundType,Terms="1년 수익률"):
-    DIC = {"6개월 수익률":6, "1년 수익률":12,"12개월 수익률":12}
-    term = DIC[Terms]
+    type_Dic = {"인덱스":"기타","인덱스형":"기타","ETF형":"ETF","이티에프형":"ETF"}
+    ret_DIC = {"6개월 수익률":6, "1년 수익률":12,"12개월 수익률":12}
+    Ftype = type_Dic[FundType]
+    term = ret_DIC[Terms]
+
     conn = pymysql.Connect(host='pythondb.ceekfdzgubcw.ap-northeast-2.rds.amazonaws.com',
                         port = 3306,
                         user = 'root',
@@ -44,7 +47,7 @@ def GetFunds(FundType,Terms="1년 수익률"):
                         autocommit=True)
     cursor = conn.cursor()
     lst=[]
-    cursor.execute("SELECT `name` FROM `fund` WHERE `FundType`='%s' and `month`= %s ORDER BY `%smonth_return` DESC"%(FundType,term,term))
+    cursor.execute("SELECT `name` FROM `fund` WHERE `FundType`='%s' and `month`= %s ORDER BY `%smonth_return` DESC"%(Ftype,term,term))
     rows = cursor.fetchall()
     for row in rows:
         lst.append(row[0])

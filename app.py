@@ -3,7 +3,7 @@ from flask import jsonify
 from flask import Flask
 from flask import request
 from flask import make_response
-from GetPrice import getPrice
+from GetPrice import *
 from crawler import *
 from Explain import *
 import sys
@@ -106,47 +106,12 @@ def EndMsg(ans,url=None):
             "type": "SimpleSpeech",
             "values": 
             {
-                "type": "PlainText",
-                "lang": "ko",
-                "value": ans 
+            "type": "PlainText",
+            "lang": "ko",
+            "value": ans 
             }
-        },
-        "card": {
-            "type": "ImageText",
-            "imageUrl": {
-                "type": "url",
-                "value": "https://img.miraeassetdaewoo.com/new2016/layout/img_logo.gif"
-            },
-            "mainText": {
-                "type": "string",
-                "value": "리오넬 메시"
-            },
-            "referenceText": {
-                "type": "string",
-                "value": "검색결과"
-            },
-            "referenceUrl": {
-                "type": "url",
-                "value": url
-            },
-            "subTextList": [
-                {
-                "type": "string",
-                "value": "FC 바르셀로나"
-                }
-            ],
-            "thumbImageType": {
-                "type": "string",
-                "value": "인물"
-            },
-            "thumbImageUrl": {
-                "type": "url",
-                "value": "https://img.miraeassetdaewoo.com/new2016/layout/img_logo.gif"
-            }
-        },
-        "directives": [],
-        "shouldEndSession": True
         }
+    }
     })
 
 @app.route('/')
@@ -202,7 +167,6 @@ def ECHO():
             return Multi(sessAttribute,intentName,"","", "어떤 종류의 펀드를 추천해 드릴까요?")
 
         elif intentName == u"펀드타입":
-            print(slots)
             KEYS = list(slots.keys())
             for key in KEYS:
                 keys.append(slots[key]["name"])
@@ -223,7 +187,7 @@ def ECHO():
                     ans += " 입니다."
                     return EndMsg(ans)
             else:
-                if "FundType" not in sessAttribute:
+                if "FundType" not in intent["slots"]:
                     return repeat(sessAttribute,"조회를 원하시는 펀드 유형을 먼저 골라주세요")
                 ans = "문의하신 " + intent["slots"]["FundType"]["value"]+" "+intent['slots']['terms']['value']+"의 추천 상품은 "
                 funds = GetFunds(intent["slots"]["FundType"]["value"], intent["slots"]["terms"]["value"])
@@ -253,17 +217,21 @@ def ECHO():
             return Message(ans)
 
         elif intentName ==u"주식추천":
-            target = slots["Dictionary"]["value"]
+            target = slots["Dic"]["value"]
             number = slots["number"]["value"]
             condition = slots["condition"]["value"]
-            """
-            ans = ""
-            lst = get_stock(target,number,condition)
+            ans = "문의하신 %s이 %s %s인 종목은 "%(target,number,condition)
+            lst = StockRecommend(target,condition,number)
+            print(lst)
             for stock in lst:
-                ans += stock
+                print(stock[0])
+                ans += stock[0]
+                ans += " 1년 수익률 "
+                ans += str(stock[1])
+                ans += ", "
             ans += "입니다."
+            print(ans)
             return Message(ans)
-            """
 
         elif intentName == u"주가확인":
             Code = intent['slots']['stockname']['value']

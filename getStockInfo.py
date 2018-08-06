@@ -207,10 +207,17 @@ def DoCrawling():
 sched = BlockingScheduler()
 @sched.scheduled_job('cron', day_of_week='mon-sun', hour=21,minute=10)
 def _Main():
+    print("Start Fund Crawling!")
     DoCrawling()
+    print("End Fund Crawling")
+    print("\nStart stock data Crawling!")
     cal_1yRet()
+    print("End stock data Crawling!")
+    print("\nStart stock return Calculating!")
     crawling_from_naver()
+    print("\nStart stock return Calculating!")
     to_sql()
+    print("FINISH!")
 sched.start()
 
 if __name__ == "__main__":
