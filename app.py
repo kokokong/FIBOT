@@ -200,20 +200,6 @@ def ECHO():
         
         elif intentName == u"펀드추천":
             return Multi(sessAttribute,intentName,"","", "어떤 종류의 펀드를 추천해 드릴까요?")
-        elif intentName ==u"용어설명":
-            DICT = slots["Dictionary"]["value"]
-            ans = "질문한 " +DICT+"은 "
-            ans +=  explain(DICT)
-            return Message(ans)
-        elif intentName == u"자산군":
-            assetgroup = slots["AssetGroup"]["value"]
-            ans = "문의하신 "+ assetgroup +"의 미래에센 추천 펀드는 "
-            refunds =recomFunds(assetgroup)
-            for refund in refunds:
-                ans += refund + " "
-            ans += "입니다"
-            url = "https://www.miraeassetdaewoo.com/hks/hks4000/n02.do"
-            return EndMsg(ans,url)
 
         elif intentName == u"펀드타입":
             print(slots)
@@ -230,20 +216,54 @@ def ECHO():
                     return repeat(sessAttribute)
                 else:
                     ans = "문의하신 " + sessAttribute["FundType"]+" "+intent['slots']['terms']['value']+"의 추천 상품은 "
-                    funds, url = GetFunds(sessAttribute["FundType"], intent["slots"]["terms"]["value"])
+                    funds= GetFunds(sessAttribute["FundType"], intent["slots"]["terms"]["value"])
                     for s in funds:
                         ans += s
                         ans += " "
                     ans += " 입니다."
-                    return EndMsg(ans,url)
+                    return EndMsg(ans)
             else:
+                if "FundType" not in sessAttribute:
+                    return repeat(sessAttribute,"조회를 원하시는 펀드 유형을 먼저 골라주세요")
                 ans = "문의하신 " + intent["slots"]["FundType"]["value"]+" "+intent['slots']['terms']['value']+"의 추천 상품은 "
-                funds, url = GetFunds(intent["slots"]["FundType"]["value"], intent["slots"]["terms"]["value"])
+                funds = GetFunds(intent["slots"]["FundType"]["value"], intent["slots"]["terms"]["value"])
                 for s in funds:
                     ans += s
                     ans += " "
                 ans += " 입니다."
-                return EndMsg(ans,url)
+                return EndMsg(ans)
+
+        elif intentName ==u"용어설명":
+            DICT = slots["Dictionary"]["value"]
+            ans = "질문한 " +DICT+"은 "
+            ans +=  explain(DICT)
+            return Message(ans)
+
+        elif intentName == u"미래추천":
+            return Multi(sessAttribute,intentName,"","", "국내펀드, 해외펀드, 대체투자 상품중에 어떤 상품을 추천해 드릴까요?")
+
+        elif intentName == u"자산군":
+            assetgroup = slots["AssetGroup"]["value"]
+            ans = "문의하신 "+ assetgroup +"의 미래에셋 추천 펀드는 "
+            refunds =recomFunds(assetgroup)
+            for refund in refunds:
+                ans += refund + " "
+            ans += "입니다."
+            url = "https://www.miraeassetdaewoo.com/hks/hks4000/n02.do"
+            return Message(ans)
+
+        elif intentName ==u"주식추천":
+            target = slots["Dictionary"]["value"]
+            number = slots["number"]["value"]
+            condition = slots["condition"]["value"]
+            """
+            ans = ""
+            lst = get_stock(target,number,condition)
+            for stock in lst:
+                ans += stock
+            ans += "입니다."
+            return Message(ans)
+            """
 
         elif intentName == u"주가확인":
             Code = intent['slots']['stockname']['value']
@@ -254,8 +274,7 @@ def ECHO():
             return Message(msg)
         else:
             return repeat(sessAttribute)
-    #except:
-    #    return Nonsuccess(sessAttribute)
+
 
 
 if __name__ == "__main__":

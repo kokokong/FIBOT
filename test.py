@@ -78,5 +78,4 @@ cursor = conn.cursor()
 cursor.execute("DROP TABLE IF EXISTS `stockInfo`")
 cursor.execute("CREATE TABLE IF NOT EXISTS `stockInfo`(`date` VARCHAR(50) NULL ,`name` VARCHAR(50) NULL ,`price` FLOAT(20) NULL ,`diff` FLOAT(20) NULL  ,`diff_per` VARCHAR(20) NULL  ,`face` FLOAT(20) NULL  ,`stocks_listed` FLOAT(20) NULL  ,`market_cap` FLOAT(20) NULL ,`foriegn` FLOAT(20) NULL  ,`per` FLOAT(20) NULL ,`roe` FLOAT(20) NULL ,`pbr` FLOAT(20) NULL, `Symbol` VARCHAR(10) NULL, `sector` VARCHAR(10) NULL, `returns` FLOAT(20) NULL,PRIMARY KEY(`name`))")
 for i in  range(len(df.index)):
-    #print(i)
     cursor.execute("INSERT INTO `stockInfo` VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')"%(df.iloc[i,0],df.iloc[i,1],df.iloc[i,2],df.iloc[i,3],df.iloc[i,4],df.iloc[i,5],df.iloc[i,6],df.iloc[i,7],df.iloc[i,8],df.iloc[i,9],df.iloc[i,10],df.iloc[i,11],df.iloc[i,12],df.iloc[i,13],df.iloc[i,14]))
