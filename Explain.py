@@ -4,7 +4,12 @@ import numpy as np
 def explain(DICT):
     df = pd.read_excel("./DATA/Terms.xlsx",index_col="용어")
     df =df.transpose()
-    explain = df.iloc[0][DICT]
+    try:
+        explain = df.iloc[0][DICT]
+    except KeyError:
+        TD = {"아로이":"ROE","단기금융상품":"MMF"}
+        DICT = TD[DICT]
+        explain = df.iloc[0][DICT]
     return explain
 
 

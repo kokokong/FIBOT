@@ -167,16 +167,14 @@ def top5_byMonth(index,month,driver):
             stock = [1,2,3,4,5,6,7,8,9,10]
             for j in range(10):
                 stock[j] = notices[j].text
-            print (stock)
             top5[i-1]=[tmp_str,stock[1],stock[5],stock[6],month]
         return top5
 
     list_top5 = myfunc(tmp_str,month)
-    print(list_top5)
     return(list_top5)
 
 def DoCrawling():
-    driver = webdriver.Chrome(executable_path='./chromedriver_win32/chromedriver')
+    driver = webdriver.Chrome(executable_path='./chromedriver')
     driver.implicitly_wait(3) # 특정요소가 나타날떄까지 기다려준다. 동적으로 움직이는걸 
                             # 기다려주는게 매우중요하다.
     tmp_lst=[]
@@ -187,7 +185,10 @@ def DoCrawling():
         b =top5_byMonth(i,12,driver)
         for j in range(5):
             tmp_lst.append(b[j])
+    print("TMP")
+    
     print(tmp_lst)
+
     conn = pymysql.Connect(host='pythondb.ceekfdzgubcw.ap-northeast-2.rds.amazonaws.com',
                         port = 3306,
                         user = 'root',
@@ -197,7 +198,7 @@ def DoCrawling():
                         autocommit=True)
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS `fund`")
-    cursor.execute("CREATE TABLE IF NOT EXISTS `fund`(`FundType` VARCHAR(10) NOT NULL,`name` VARCHAR(50) NOT NULL,`6month_return` FLOAT(10) NULL ,`12month_return` FLOAT NULL,`month` INT(10) NOT NULL)") 
+    cursor.execute("CREATE TABLE IF NOT EXISTS `fund`(`FundType` VARCHAR(10) NOT NULL,`name` VARCHAR(50) NOT NULL,`6month_return` FLOAT(20) NULL ,`12month_return` FLOAT(20) NULL,`month` INT(10) NOT NULL)") 
     for i in range(len(tmp_lst)):
         cursor.execute("INSERT INTO `fund` VALUES('%s','%s','%s','%s','%s')"%(tmp_lst[i][0],tmp_lst[i][1],tmp_lst[i][2],tmp_lst[i][3],tmp_lst[i][4]))
     cursor.close()
@@ -205,8 +206,8 @@ def DoCrawling():
 
 
 sched = BlockingScheduler()
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=21,minute=10)
-def _Main():
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=18,minute=00)
+def _Main(): #매일주기로 DB 업데이트를 하기 위한 스케줄러 코드
     print("Start Fund Crawling!")
     DoCrawling()
     print("End Fund Crawling")
@@ -217,13 +218,15 @@ def _Main():
     crawling_from_naver()
     print("\nStart stock return Calculating!")
     to_sql()
+    today = datetime.date.today()
+    print(today)
     print("FINISH!")
 sched.start()
 
 if __name__ == "__main__":
     #crawling_from_naver()
     #to_sql()
-    #_Main()
+    _Main()
     pass
     """
     cursor.execute("SELECT `name`,`pbr`,`market_cap` FROM `ppp`.`stockInfo` WHERE `sector`='제조업' and `pbr`<10 and `pbr`>0 ORDER BY `market_cap` DESC limit 5")
